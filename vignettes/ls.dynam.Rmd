@@ -1,0 +1,166 @@
+---
+title: "Latent space DyNAMs with a position-rate link"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Latent space DyNAMs with a position-rate link}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 3.6,
+                      out.width = "100%")
+```
+
+This vignette shows the main functions of **ls.dynam** on simulated data. The
+model and the methods are described in Caimo and Gollini, *Latent space
+dynamic network actor models with position-rate link*.
+
+## The model
+
+In a dynamic network actor model (DyNAM) each event is the outcome of two
+decisions: when an actor becomes active, and whom it selects. Actor $i$
+becomes active with intensity
+$$\lambda_i(t) = \exp\{\xi^\top s(i;t) + a_i\},$$
+and selects receiver $j \neq i$ with probability proportional to
+$\exp\{\zeta^\top s(i,j;t) + u_i^\top v_j\}$, where $u_i$ and $v_j$ are
+latent sender and receiver positions. The choice model identifies the
+positions only up to transformations, but it identifies the *latent
+popularity* $\pi_i$, how much the average sender favours $i$ as a receiver,
+and the *excess self-affinity* $\rho_i$, the preference of $i$ for actors
+like itself beyond its popularity (`position_summaries()`). The
+position-rate link relates them to the activity effects:
+$$a_i \sim N\{\mu_a + g_\pi(\pi_i) + g_\rho(\rho_i), \sigma_a^2\},$$
+with natural cubic splines $g_\pi$ and $g_\rho$. Inference is modular: the
+positions are estimated from the choice of receivers alone, and the link is
+estimated given them.
+
+## Simulated data
+
+We simulate 3,000 events among 40 actors, with one latent dimension and
+activity associated with latent popularity only.
+
+```{r simulate}
+library(ls.dynam)
+f <- function(x) 1.5 * (plogis(3 * x) - 0.5)          # a smooth step
+tr <- make_truth(n = 40, D = 1, link_fun = list(pop = f, rho = NULL),
+                 link_var = c("pop", "rho"), mean_u = 1, sigma_a = 0.5,
+                 xi = c(rate_indeg = 0.1), zeta = c(choice_recip = 0.5), seed = 1)
+ev <- simulate_lsdynam(tr$theta, n = 40, M = 3000, seed = 2)
+head(ev, 3)
+```
+
+The data frame of events has columns `sender`, `receiver` (labels
+$1, \dots, n$) and `time`. For real data, `read_konect_events()`,
+`prepare_events()`, `select_time_window()` and `filter_active_both()` produce
+it (see the last section).
+
+## Fitting the model
+
+`lsdynam_fit()` fits both stages. By default the statistics are the
+in-degree in the rate sub-process and reciprocity in the choice sub-process,
+and the link is the additive link in latent popularity and excess
+self-affinity. Here we use the Laplace approximation (`inference = "map"`),
+which takes seconds; the analysis in the paper uses posterior simulation
+(see below).
+
+```{r fit}
+fit <- lsdynam_fit(ev, n = 40, D = 1, inference = "map", n_starts = 3, verbose = FALSE)
+summary(fit)
+```
+
+The contrasts compare the level of each component at the 90% and 10%
+quantiles of its summary, and the log Bayes factors test the whole link and
+each component given the other. `plot()` shows the components of the link;
+the rug marks the actors' values.
+
+```{r link-plot}
+plot(fit)
+```
+
+The truth is a step in popularity and no effect of excess self-affinity. The
+contrasts and Bayes factors can also be obtained directly:
+
+```{r link-summaries}
+ct <- link_contrast(fit, "pop")
+round(c(estimate = ct$mean, lower = ct$ci[1], upper = ct$ci[2]), 2)
+link_evidence(fit, components = "rho")$log_bf10_laplace   # excess self-affinity given popularity
+```
+
+Links in other summaries can be compared on the same positions by their log
+marginal likelihoods; the difference between `"pop + rho"` and `"pop"` is
+the log Bayes factor for excess self-affinity given popularity.
+
+```{r comparison}
+cmp <- link_comparison_table(fit, list("pop + rho" = c("pop", "rho"), pop = "pop",
+                                       rho = "rho", r = "r"))
+cmp$table[, c("link", "K", "sigma_a", "log_ml_vs_M1", "R2")]
+```
+
+With one dimension the positions can be displayed. Filled points have
+positive self-affinity.
+
+```{r positions, fig.height = 4.5, fig.width = 5, out.width = "70%"}
+plot_positions(fit, ellipses = FALSE)
+```
+
+## Prediction
+
+The models are compared on held-out events: $\mathcal{M}_0$ has no latent
+positions, $\mathcal{M}_1$ has positions but no link, and $\mathcal{M}_2$ has
+both. The choice score compares $\mathcal{M}_1$ with $\mathcal{M}_0$, the
+rate score $\mathcal{M}_2$ with $\mathcal{M}_1$.
+
+```{r prediction}
+m_tr <- 2400
+train <- ev[seq_len(m_tr), ]
+m0 <- lsdynam_fit(train, n = 40, D = 0, inference = "map", verbose = FALSE)
+m2 <- lsdynam_fit(train, n = 40, D = 1, inference = "map", verbose = FALSE)
+m1 <- lsdynam_fit(train, n = 40, D = 1, link = "none", inference = "map",
+                  choice = m2$choice, verbose = FALSE)
+sc <- lapply(list(M0 = m0, M1 = m1, M2 = m2), predictive_scores,
+             events_full = ev, n = 40, m_train = m_tr, n_draws = 100)
+rbind("M1 - M0" = score_difference(sc$M1, sc$M0)[2, 2:4],
+      "M2 - M1" = score_difference(sc$M2, sc$M1)[1, 2:4])
+```
+
+The latent positions improve the prediction of the receivers considerably.
+The link improves the rate score only slightly, because the rate of an actor
+who has sent many events is determined by its own record: it describes how
+activity varies with position rather than improving the forecast of when
+actors send.
+
+## Posterior simulation
+
+The analysis of the paper simulates both modules with a Metropolis-adjusted
+Langevin algorithm, from many starting configurations of the choice module,
+and adds the cut posterior. The following code is not run here.
+
+```{r mcmc, eval = FALSE}
+fit <- lsdynam_fit(ev, n = 40, D = 1, n_iter = 12000, burn_in = 2000, thin = 5,
+                   n_starts = 30, n_cut = 300)
+mcmc_diagnostics(fit)                       # effective sample sizes, acceptance
+plot_traces(fit)
+mode_stability_check(fit)                   # the link at each mode of the choice module
+plot(fit)                                   # plug-in (shaded) and cut (dashed) posteriors
+link_evidence(fit, components = "rho", sigma_kappa_grid = c(0.1, 0.25, 0.5, 1, 2))
+# reference distributions: no association, and popularity only
+cal0 <- null_link_calibration(fit, n_rep = 20)
+cal1 <- null_link_calibration(fit, n_rep = 20, keep = "pop")
+```
+
+## Real data
+
+The Radoslaw e-mail data are available from the KONECT collection
+(<https://konect.cc/networks/radoslaw_email>). The analysis of the paper
+used the second fifth of the observation period and the actors who both
+send and receive in it.
+
+```{r real, eval = FALSE}
+ev <- read_konect_events("out.radoslaw_email_email")
+ev <- prepare_events(ev)                       # days; messages; ties separated
+ev <- select_time_window(ev, start_frac = 0.2, end_frac = 0.4)
+fa <- filter_active_both(ev)
+fit <- lsdynam_fit(fa$events_df, n = fa$n, D = 1, n_iter = 12000, burn_in = 2000,
+                   thin = 5, n_starts = 30, n_cut = 300)
+```

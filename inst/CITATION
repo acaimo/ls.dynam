@@ -1,0 +1,21 @@
+bibentry(
+  bibtype = "Unpublished",
+  title = "Latent space dynamic network actor models with position-rate link",
+  author = c(person("Alberto", "Caimo"), person("Isabella", "Gollini")),
+  note = "Manuscript",
+  year = "2026",
+  textVersion = paste("Caimo, A. and Gollini, I. (2026).",
+                      "Latent space dynamic network actor models with position-rate link.",
+                      "Manuscript.")
+)
+
+bibentry(
+  bibtype = "Manual",
+  title = "ls.dynam: Latent Space Dynamic Network Actor Models with a Position-Rate Link",
+  author = c(person("Alberto", "Caimo"), person("Isabella", "Gollini")),
+  note = "R package version 0.1.0",
+  year = "2026",
+  textVersion = paste("Caimo, A. and Gollini, I. (2026).",
+                      "ls.dynam: Latent Space Dynamic Network Actor Models with a Position-Rate Link.",
+                      "R package version 0.1.0.")
+)

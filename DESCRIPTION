@@ -1,0 +1,32 @@
+Package: ls.dynam
+Type: Package
+Title: Latent Space Dynamic Network Actor Models with Position-Rate Link
+Version: 0.1.0
+Authors@R: c(
+    person("Alberto", "Caimo", email = "alberto.caimo1@ucd.ie",
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8956-7166")),
+    person("Isabella", "Gollini", role = "aut",
+           comment = c(ORCID = "0000-0002-7738-5688")))
+Description: Bayesian inference for latent space dynamic network actor models
+    With position-rate link relating summaries of the positions that the choice
+    model identifies, such as latent popularity and excess self-affinity, to
+    the activity effects through a spline regression. 
+    Modular posterior inference: the latent positions are estimated from the choice
+    model alone via MALA or Laplace approximation, and the
+    link is estimated under the plug-in or the cut posterior. 
+    The package also provides Bayes factors for the link and its components, 
+    held-out predictive scores, calibration by simulation, diagnostics.
+License: GPL (>= 2)
+Encoding: UTF-8
+Depends: R (>= 4.0.0)
+Imports: graphics, grDevices, splines, stats, utils
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+NeedsCompilation: no
+Packaged: 2026-10-17 20:13:56 UTC; root
+Author: Alberto Caimo [aut, cre] (<https://orcid.org/0000-0001-8956-7166>),
+  Isabella Gollini [aut] (<https://orcid.org/0000-0002-7738-5688>)
+Maintainer: Alberto Caimo <alberto.caimo1@ucd.ie>
