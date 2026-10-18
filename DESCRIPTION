@@ -24,9 +24,9 @@ Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
 NeedsCompilation: no
 Packaged: 2026-10-17 20:13:56 UTC; root
 Author: Alberto Caimo [aut, cre] (<https://orcid.org/0000-0001-8956-7166>),
   Isabella Gollini [aut] (<https://orcid.org/0000-0002-7738-5688>)
 Maintainer: Alberto Caimo <alberto.caimo1@ucd.ie>
+Config/roxygen2/version: 8.1.1
