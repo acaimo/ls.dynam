@@ -5,7 +5,7 @@ Version: 0.1.0
 Authors@R: c(
     person("Alberto", "Caimo", email = "alberto.caimo1@ucd.ie",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8956-7166")),
-    person("Isabella", "Gollini", role = "aut",
+    person("Isabella", "Gollini", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7738-5688")))
 Description: Bayesian inference for latent space dynamic network actor models
     With position-rate link relating summaries of the positions that the choice
