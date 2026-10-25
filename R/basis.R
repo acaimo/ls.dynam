@@ -1,14 +1,4 @@
-# Basis of the position-rate link. X is the n x p matrix of link variables
-# (one column per additive component). Each column is winsorised (optional,
-# two-sided), centred, expanded in a natural cubic spline basis with df
-# functions (interior knots at quantiles, boundary knots at the extremes) or
-# kept linear; the basis columns are centred across actors, so that mu_a is
-# the average level, and with scale = TRUE divided by their standard
-# deviation, so that the prior kappa_k ~ N(0, sigma2_kappa) means the same
-# thing for every link variable: each basis function contributes a term with
-# prior standard deviation sigma_kappa to the activity effect of a typical
-# actor. The returned spec evaluates the same basis at new values (grids,
-# posterior draws of the summaries).
+# Basis of the position-rate link
 build_link_basis <- function(X, type = c("spline", "linear"), df = 4, winsorize_q = 1, scale = TRUE) {
   type <- match.arg(type)
   X <- as.matrix(X); p <- ncol(X); n <- nrow(X)

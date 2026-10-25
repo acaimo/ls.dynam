@@ -16,7 +16,7 @@ self-affinity, to the activity of each actor:
   cubic splines `g`.
 
 Inference is Bayesian and modular: the positions are estimated from the choice
-of receivers alone, by a Metropolis-adjusted Langevin algorithm (MALA) or a Laplace
+of receivers alone, by a Metropolis-adjusted Langevin algorithm or a Laplace
 approximation, and the link under the plug-in or the cut posterior.
 
 ## Installation
@@ -24,8 +24,7 @@ approximation, and the link under the plug-in or the cut posterior.
 From the source file:
 
 ```r
-# install.packages("remotes")
-remotes::install_github("acaimo/ls.dynam")
+install.packages("ls.dynam_0.1.0.tar.gz", repos = NULL, type = "source")
 ```
 
 The package needs only base R (packages `stats`, `graphics`, `grDevices`,
@@ -36,13 +35,14 @@ The package needs only base R (packages `stats`, `graphics`, `grDevices`,
 ```r
 library(ls.dynam)
 
-# simulate relational events in which activity depends on latent popularity
+# simulate events in which activity depends on latent popularity
 f  <- function(x) 1.5 * (plogis(3 * x) - 0.5)
 tr <- make_truth(n = 40, D = 1, link_fun = list(f, NULL), link_var = c("pop", "rho"),
                  mean_u = 1, seed = 1)
 ev <- simulate_lsdynam(tr$theta, n = 40, M = 3000, seed = 2)
 
-# model inference
+# fit (Laplace approximation; use inference = "mcmc", the default, for the
+# full posterior)
 fit <- lsdynam_fit(ev, n = 40, D = 1, inference = "map", n_starts = 3)
 summary(fit)                                  # coefficients, contrasts, Bayes factors
 plot(fit)                                     # components of the link
@@ -61,7 +61,7 @@ the analyses of the paper are in `system.file("scripts", package = "ls.dynam")`
 | Data | `read_konect_events()`, `prepare_events()`, `select_time_window()`, `filter_active_both()`, `exclude_actors()`, `compute_stats()` |
 | Fitting | `lsdynam_fit()`, `lsdynam_choice_stage()`, `lsdynam_rate_stage()`, `lsdynam_priors()` |
 | Summaries of the positions | `position_summaries()`, `summaries_draws()`, `summary_label()` |
-| Rate-position link | `summary()`, `link_curve()`, `link_contrast()`, `link_evidence()`, `link_r2()`, `link_comparison_table()` |
+| The link | `summary()`, `link_curve()`, `link_contrast()`, `link_evidence()`, `link_r2()`, `link_comparison_table()` |
 | Plots | `plot()`, `plot_link_level()`, `plot_link_slope()`, `plot_positions()`, `plot_activity_effects()`, `plot_traces()` |
 | Prediction | `predictive_scores()`, `score_difference()` |
 | Diagnostics and calibration | `mcmc_diagnostics()`, `ess()`, `mode_stability_check()`, `null_link_calibration()`, `link_shrinkage_check()`, `link_leverage_check()`, `summary_agreement_check()` |
@@ -72,4 +72,5 @@ reproducible.
 
 ## Reference
 
-Caimo, A. and Gollini, I., ``Latent space dynamic network actor models with position-rate link.''
+Caimo, A. and Gollini, I. Latent space dynamic network actor models with
+position-rate link. Manuscript.

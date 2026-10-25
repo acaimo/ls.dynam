@@ -1,21 +1,25 @@
 Package: ls.dynam
 Type: Package
-Title: Latent Space Dynamic Network Actor Models with Position-Rate Link
+Title: Latent Space Dynamic Network Actor Models with a Position-Rate
+        Link
 Version: 0.1.0
 Authors@R: c(
-    person("Alberto", "Caimo", email = "alberto.caimo1@ucd.ie",
+    person("Alberto", "Caimo", email = "alberto.caimo@gmail.com",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8956-7166")),
-    person("Isabella", "Gollini", role = c("aut", "cre"),
+    person("Isabella", "Gollini", role = "aut",
            comment = c(ORCID = "0000-0002-7738-5688")))
 Description: Bayesian inference for latent space dynamic network actor models
-    With position-rate link relating summaries of the positions that the choice
+    of relational event data. An actor's activity follows a Poisson-type rate
+    model with random activity effects, and its choice of receivers follows a
+    conditional logit model with latent sender and receiver positions. A
+    position-rate link relates summaries of the positions that the choice
     model identifies, such as latent popularity and excess self-affinity, to
-    the activity effects through a spline regression. 
-    Modular posterior inference: the latent positions are estimated from the choice
-    model alone via Metropolis-adjusted Langevin algorithm (MALA) or Laplace approximation, and the
-    link is estimated under the plug-in or the cut posterior. 
-    The package also provides Bayes factors for the link and its components, 
-    held-out predictive scores, calibration by simulation, diagnostics.
+    the activity effects through a spline regression. Inference is modular:
+    the positions are estimated from the choice of receivers alone, by a
+    Metropolis-adjusted Langevin algorithm (MALA) or a Laplace approximation, and the
+    link is estimated under the plug-in or the cut posterior. The package also
+    provides Bayes factors for the link and its components, held-out
+    predictive scores, calibration by simulation, diagnostics and a simulator.
 License: GPL (>= 2)
 Encoding: UTF-8
 Depends: R (>= 4.0.0)
@@ -24,9 +28,9 @@ Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
 NeedsCompilation: no
 Packaged: 2026-10-17 20:13:56 UTC; root
 Author: Alberto Caimo [aut, cre] (<https://orcid.org/0000-0001-8956-7166>),
   Isabella Gollini [aut] (<https://orcid.org/0000-0002-7738-5688>)
-Maintainer: Alberto Caimo <alberto.caimo1@ucd.ie>
-Config/roxygen2/version: 8.1.1
+Maintainer: Alberto Caimo <alberto.caimo@gmail.com>

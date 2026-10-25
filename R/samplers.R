@@ -1,18 +1,5 @@
 # Metropolis-adjusted Langevin algorithm, preconditioned with a fixed
-# covariance (the Laplace covariance at the mode). fn(par) must return
-# list(value = log-posterior, gradient = its gradient). The step size is
-# adapted during burn-in only (target acceptance 0.57) and then frozen, so
-# the retained draws come from a valid Metropolis-Hastings chain. With d
-# parameters a random walk needs of the order of d iterations per independent
-# draw, MALA of the order of d^(1/3).
-# align (optional, used for the choice module): a function of par returning
-# list(par = the configuration rotated to the reference orientation, rot = a
-# function applying the same rotation to another configuration). The
-# posterior is invariant to rotations of the latent space, but the
-# preconditioner is only appropriate near the orientation of the mode; with
-# align the kernel commutes with rotations, the Hastings ratio evaluates the
-# reverse proposal in the frame of the proposed configuration and the state
-# is kept in the reference orientation.
+# covariance (the Laplace covariance at the mode)
 mala_sample <- function(fn, par0, cov0, n_iter = 5000, burn_in = 1000, thin = 1,
                         eps = NULL, target_accept = 0.57, align = NULL, seed = 1, verbose = FALSE) {
   set.seed(seed)

@@ -71,8 +71,6 @@ make_truth <- function(n, D, link_fun = NULL, link_var = "r", mu_a = 0, sigma_a 
     function(x_raw) (if (is.null(f)) rep(0, length(x_raw)) else f(x_raw - cl)) - ml
   })
   names(comp_fun) <- link_var
-  # level of one component as a function of its raw summary (the other
-  # components at their average contribution, which is zero)
   level_fun <- function(x_raw, component = 1) mu_a + comp_fun[[component]](x_raw)
   list(theta = list(xi = xi, zeta = zeta, a = a, U = U, V = V),
        n = n, D = D, summaries = ps, link_var = link_var,

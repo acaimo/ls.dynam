@@ -1,10 +1,3 @@
-# Rate module. The rate statistics of actor i change only when i sends or
-# receives, so the exposure sum_m Delta_m exp{xi's(i;t_m) + a_i} over all M
-# events collapses to one term per spell during which the statistics of i are
-# constant, at a cost of order M + n per evaluation instead of M * n.
-#   rows       : event indices to use (default all); used for held-out scores
-#   rate_event : logical, TRUE for events that count as a sending decision
-#                (default all)
 compress_rate_stats <- function(sl, senders, n, rows = NULL, rate_event = NULL) {
   rnames <- rate_stat_names(sl); R <- length(rnames)
   M <- length(sl$delta_t)
@@ -37,9 +30,7 @@ compress_rate_stats <- function(sl, senders, n, rows = NULL, rate_event = NULL) 
 
 # Log-posterior of the rate module, with all normalising constants (needed
 # for the marginal likelihood), its gradient and, with deriv = 2, the Hessian
-# of the NEGATIVE log-posterior. par = (xi[1..R], a[1..n], mu_a, kappa[1..K]);
-# B is the n x K link basis (K = 0: no link); nu < Inf gives Student-t
-# activity effects.
+# of the NEGATIVE log-posterior
 rate_mod_eval <- function(par, cr, B, hp, sigma2_a, nu = Inf, deriv = 1) {
   n <- cr$n; R <- cr$R; K <- ncol(B)
   xi <- par[seq_len(R)]; a <- par[R + seq_len(n)]; mu <- par[R + n + 1]
@@ -112,8 +103,7 @@ rate_mod_eval <- function(par, cr, B, hp, sigma2_a, nu = Inf, deriv = 1) {
 }
 
 # Posterior mode of the rate module by Newton's method with step halving, and
-# the Laplace approximation to the log marginal likelihood. For the Gaussian
-# link and fixed sigma_a the log-posterior is strictly concave.
+# the Laplace approximation to the log marginal likelihood
 rate_mod_fit <- function(cr, B, hp, sigma2_a, nu = Inf, start = NULL, maxit = 200, tol = 1e-8) {
   n <- cr$n; R <- cr$R; K <- ncol(B)
   d <- R + n + 1 + K
@@ -130,8 +120,6 @@ rate_mod_fit <- function(cr, B, hp, sigma2_a, nu = Inf, start = NULL, maxit = 20
       tryCatch(solve(ev$hessian, ev$gradient), error = function(e) NULL)
     } else NULL
     if (is.null(step)) {
-      # Student-t link (Hessian not necessarily positive definite) or a
-      # numerically singular system: use the regularised inverse
       step <- as.numeric(hessian_to_cov(ev$hessian, rel_floor = 1e-6)$cov %*% ev$gradient)
     }
     slope <- sum(ev$gradient * step)
@@ -156,9 +144,7 @@ rate_mod_fit <- function(cr, B, hp, sigma2_a, nu = Inf, start = NULL, maxit = 20
 }
 
 # sigma_a, and optionally sigma_kappa, by maximum marginal likelihood (Laplace
-# approximation). The joint mode over (a, sigma_a) does not exist, so the
-# standard deviations are not optimised together with the other parameters.
-# sigma_a: NULL = estimate; a number = keep fixed.
+# approximation).
 rate_mod_fit_eb <- function(cr, B, hp, nu = Inf, interval = c(0.02, 10), start = NULL,
                             sigma_a = NULL, eb_kappa = FALSE, interval_kappa = c(0.01, 20)) {
   cache <- new.env()
@@ -272,8 +258,7 @@ lsdynam_rate_stage <- function(events_df, n, sl, choice,
     if (!all(link %in% names(ps))) stop("unknown link variable(s): ", paste(setdiff(link, names(ps)), collapse = ", "))
         X <- as.matrix(ps[, link, drop = FALSE])
     if (plugin == "summary") {
-      # posterior mean of the summary itself, E(x_i | events), instead of the
-      # summary of the posterior-mean positions
+      # posterior mean of the summary itself, E(x_i | events)
       X <- apply(summaries_draws(choice$U, choice$V, link), c(2, 3), mean)
       X <- matrix(X, nrow = n, dimnames = list(NULL, link))
     }
@@ -285,7 +270,7 @@ lsdynam_rate_stage <- function(events_df, n, sl, choice,
   }
   K <- ncol(B)
 
-    # sigma_kappa: NULL = prior variance priors$sigma2_kappa; a number = that
+  # sigma_kappa: NULL = prior variance priors$sigma2_kappa; a number = that
   # prior standard deviation; "eb" = maximum marginal likelihood
   eb_kappa <- identical(sigma_kappa, "eb") && K > 0
   if (is.numeric(sigma_kappa)) hp$sigma2_kappa <- sigma_kappa^2

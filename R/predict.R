@@ -47,8 +47,6 @@ predictive_scores <- function(fit, events_full, n, m_train, n_draws = 200, rate_
   cr <- compress_rate_stats(sl, senders, n, rows = test, rate_event = rate_event)
   nr <- nrow(fit$rate$a)
   ir <- unique(round(seq(1, nr, length.out = min(n_draws, nr))))
-  # sum of the rate statistics over the held-out events sent by each actor
-  # (the event term xi's(i_m;t_m) is attributed to the sending actor)
   ev_ok <- if (is.null(rate_event)) rep(TRUE, length(test)) else rate_event[test]
   S_ev_actor <- matrix(0, n, cr$R)
   for (r in seq_len(cr$R)) {

@@ -1,4 +1,3 @@
-# log(mean(exp(x))) without overflow.
 log_mean_exp <- function(x) {
   m <- max(x)
   if (!is.finite(m)) return(m)

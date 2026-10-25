@@ -51,11 +51,6 @@ choice_neggrad <- function(par, n, D, S, sl, senders, receivers, cnames,
   g_zeta <- g_zeta - pk$zeta / sigma2_zeta
   if (D == 0) return(-g_zeta)   # no latent positions (reference model M0)
 
-  # vectorized replacement for a per-actor loop with which(senders==i) /
-  # which(senders!=i) inside it -- that was O(n*M) redundant scanning per
-  # gradient call (found to roughly double per-call cost at n=167,
-  # M~25000). Mathematically exact rewrite (verified identical to machine
-  # precision against the loop version), not an approximation.
   full_rowsum <- function(x, group, n) {
     out <- matrix(0, n, ncol(x))
     ug  <- sort(unique(group))
@@ -71,8 +66,7 @@ choice_neggrad <- function(par, n, D, S, sl, senders, receivers, cnames,
 
   # g_V: positive = sum over events where i IS receiver, of U[sender,];
   #      negative = sum over ALL events of pi[m,i]*U[sender,] -- pi[m,sender_m]
-  #      is exactly 0 by construction (self-choice excluded), so no
-  #      explicit sender!=i filtering is needed
+  #      is exactly 0 by construction (self-choice excluded)
   g_V_pos <- full_rowsum(pk$U[senders, , drop = FALSE], receivers, n)
   g_V_neg <- t(ep$pi) %*% pk$U[senders, , drop = FALSE]
   g_V <- g_V_pos - g_V_neg - pk$V / sigma2_v
@@ -104,9 +98,6 @@ choice_val_grad <- function(par, n, D, S, sl, senders, receivers, cnames,
        gradient = c(g_zeta, as.vector(g_U_full - pk$U / sigma2_u), as.vector(g_V - pk$V / sigma2_v)))
 }
 
-# Starting configuration from the singular value decomposition of the
-# row-centred matrix of log(1 + number of events from i to j). Row-centring
-# removes the sender effect, which cancels in the choice model.
 spectral_start_choice <- function(events_df, n, D) {
   tab <- table(factor(events_df$sender, levels = seq_len(n)),
                factor(events_df$receiver, levels = seq_len(n)))
@@ -120,13 +111,7 @@ spectral_start_choice <- function(events_df, n, D) {
 }
 
 # Posterior mode of the choice module by BFGS from several starts (n_starts
-# random starts and, with spectral_start = TRUE, one spectral start). The
-# objective is not concave in (U, V) and has local modes; the best start is
-# kept and all of them are returned ($starts, $start_par), with their
-# convergence codes (1 = iteration limit reached). The covariance of the
-# Laplace approximation floors the eigenvalues of the Hessian at half the
-# prior precision of the positions before inversion, so that the flat
-# directions (rotations, for D >= 2) get a large but finite variance.
+# random starts and, with spectral_start = TRUE, one spectral start).
 fit_choice_model <- function(events_df, n, D, sl,
                               sigma2_zeta = 4, sigma2_u = 1, sigma2_v = 1,
                               seed = 1, hessian = TRUE, n_starts = 1,
@@ -185,8 +170,7 @@ fit_choice_model <- function(events_df, n, D, sl,
     H <- optimHess(fit$par, choice_negloglik, gr = choice_neggrad,
                    n = n, D = D, S = S, sl = sl, senders = senders, receivers = receivers,
                    cnames = cnames, sigma2_zeta = sigma2_zeta, sigma2_u = sigma2_u, sigma2_v = sigma2_v)
-    # floor the Hessian's eigenvalues, then invert: for D >= 2 the Hessian is
-    # singular along the rotations of the latent space
+
     hc <- hessian_to_cov(H, abs_floor = if (D > 0) 0.5 * min(1 / sigma2_u, 1 / sigma2_v) else 0)
     vcov <- hc$cov
     n_floored <- hc$n_floored
@@ -202,8 +186,7 @@ fit_choice_model <- function(events_df, n, D, sl,
        n_floored = n_floored)
 }
 
-# Orthogonal Procrustes alignment of every draw to a reference configuration
-# (U and V jointly, since they are subject to the same transformation).
+# Orthogonal Procrustes alignment
 align_choice_draws <- function(U_draws, V_draws, U_ref, V_ref) {
   n <- dim(U_draws)[2]; D <- dim(U_draws)[3]
   if (D == 0) return(list(U = U_draws, V = V_draws))
