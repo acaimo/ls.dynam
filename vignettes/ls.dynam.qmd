@@ -89,11 +89,6 @@ ev <- simulate_lsdynam(tr$theta,
 head(ev, 3)
 ```
 
-The data frame of events has columns `sender`, `receiver` (labels
-$1, \dots, n$) and `time`. For real data, `read_konect_events()`,
-`prepare_events()`, `select_time_window()` and `filter_active_both()` produce
-it (see the last section).
-
 ## Estimation
 
 `lsdynam_fit()` fits both stages. By default the statistics are the
