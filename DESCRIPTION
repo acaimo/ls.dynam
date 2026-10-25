@@ -12,7 +12,7 @@ Description: Bayesian inference for latent space dynamic network actor models
     model identifies, such as latent popularity and excess self-affinity, to
     the activity effects through a spline regression. 
     Modular posterior inference: the latent positions are estimated from the choice
-    model alone via MALA or Laplace approximation, and the
+    model alone via Metropolis-adjusted Langevin algorithm (MALA) or Laplace approximation, and the
     link is estimated under the plug-in or the cut posterior. 
     The package also provides Bayes factors for the link and its components, 
     held-out predictive scores, calibration by simulation, diagnostics.

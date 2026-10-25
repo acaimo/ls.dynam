@@ -42,11 +42,23 @@ activity associated with latent popularity only.
 
 ```{r simulate}
 library(ls.dynam)
-f <- function(x) 1.5 * (plogis(3 * x) - 0.5)          # a smooth step
-tr <- make_truth(n = 40, D = 1, link_fun = list(pop = f, rho = NULL),
-                 link_var = c("pop", "rho"), mean_u = 1, sigma_a = 0.5,
-                 xi = c(rate_indeg = 0.1), zeta = c(choice_recip = 0.5), seed = 1)
-ev <- simulate_lsdynam(tr$theta, n = 40, M = 3000, seed = 2)
+f <- function(x) 1.5 * (plogis(3 * x) - 0.5)
+g <- function(x) (4 * (plogis(2 * x) - 0.5))^2
+
+tr <- make_truth(n = 20, 
+                 D = 2, 
+                 link_fun = list(pop = f, rho = g),
+                 link_var = c("pop", "rho"), 
+                 mean_u = 1, 
+                 sigma_a = 0.5,
+                 xi = c(rate_indeg = 0.1), 
+                 zeta = c(choice_recip = 0.5), 
+                 seed = 1)
+
+ev <- simulate_lsdynam(tr$theta, 
+                       n = 20, 
+                       M = 3000, 
+                       seed = 2)
 head(ev, 3)
 ```
 
@@ -65,7 +77,13 @@ which takes seconds; the analysis in the paper uses posterior simulation
 (see below).
 
 ```{r fit}
-fit <- lsdynam_fit(ev, n = 40, D = 1, inference = "map", n_starts = 3, verbose = FALSE)
+fit <- lsdynam_fit(ev, 
+                   n = 20, 
+                   D = 1, 
+                   inference = "map", 
+                   n_starts = 3, 
+                   verbose = FALSE)
+
 summary(fit)
 ```
 
@@ -83,8 +101,10 @@ contrasts and Bayes factors can also be obtained directly:
 
 ```{r link-summaries}
 ct <- link_contrast(fit, "pop")
+
 round(c(estimate = ct$mean, lower = ct$ci[1], upper = ct$ci[2]), 2)
-link_evidence(fit, components = "rho")$log_bf10_laplace   # excess self-affinity given popularity
+
+link_evidence(fit, components = "rho")$log_bf10_laplace   # rho | mu
 ```
 
 Links in other summaries can be compared on the same positions by their log
@@ -92,8 +112,11 @@ marginal likelihoods; the difference between `"pop + rho"` and `"pop"` is
 the log Bayes factor for excess self-affinity given popularity.
 
 ```{r comparison}
-cmp <- link_comparison_table(fit, list("pop + rho" = c("pop", "rho"), pop = "pop",
-                                       rho = "rho", r = "r"))
+cmp <- link_comparison_table(fit, list("pop + rho" = c("pop", "rho"), 
+                                       pop = "pop",
+                                       rho = "rho", 
+                                       r = "r"))
+
 cmp$table[, c("link", "K", "sigma_a", "log_ml_vs_M1", "R2")]
 ```
 
@@ -114,12 +137,15 @@ rate score $\mathcal{M}_2$ with $\mathcal{M}_1$.
 ```{r prediction}
 m_tr <- 2400
 train <- ev[seq_len(m_tr), ]
+
 m0 <- lsdynam_fit(train, n = 40, D = 0, inference = "map", verbose = FALSE)
 m2 <- lsdynam_fit(train, n = 40, D = 1, inference = "map", verbose = FALSE)
 m1 <- lsdynam_fit(train, n = 40, D = 1, link = "none", inference = "map",
                   choice = m2$choice, verbose = FALSE)
+
 sc <- lapply(list(M0 = m0, M1 = m1, M2 = m2), predictive_scores,
              events_full = ev, n = 40, m_train = m_tr, n_draws = 100)
+
 rbind("M1 - M0" = score_difference(sc$M1, sc$M0)[2, 2:4],
       "M2 - M1" = score_difference(sc$M2, sc$M1)[1, 2:4])
 ```
@@ -139,17 +165,23 @@ and adds the cut posterior. The following code is not run here.
 ```{r mcmc, eval = FALSE}
 fit <- lsdynam_fit(ev, n = 40, D = 1, n_iter = 12000, burn_in = 2000, thin = 5,
                    n_starts = 30, n_cut = 300)
-mcmc_diagnostics(fit)                       # effective sample sizes, acceptance
+
+mcmc_diagnostics(fit)      # effective sample sizes, acceptance
+
 plot_traces(fit)
-mode_stability_check(fit)                   # the link at each mode of the choice module
-plot(fit)                                   # plug-in (shaded) and cut (dashed) posteriors
+
+mode_stability_check(fit)  # the link at each mode of the choice module
+
+plot(fit)                  # plug-in (shaded) and cut (dashed) posteriors
+
 link_evidence(fit, components = "rho", sigma_kappa_grid = c(0.1, 0.25, 0.5, 1, 2))
+
 # reference distributions: no association, and popularity only
 cal0 <- null_link_calibration(fit, n_rep = 20)
 cal1 <- null_link_calibration(fit, n_rep = 20, keep = "pop")
 ```
 
-## Real data
+## Radoslaw e-mail data
 
 The Radoslaw e-mail data are available from the KONECT collection
 (<https://konect.cc/networks/radoslaw_email>). The analysis of the paper
@@ -158,9 +190,17 @@ send and receive in it.
 
 ```{r real, eval = FALSE}
 ev <- read_konect_events("out.radoslaw_email_email")
-ev <- prepare_events(ev)                       # days; messages; ties separated
+ev <- prepare_events(ev) 
 ev <- select_time_window(ev, start_frac = 0.2, end_frac = 0.4)
+
 fa <- filter_active_both(ev)
-fit <- lsdynam_fit(fa$events_df, n = fa$n, D = 1, n_iter = 12000, burn_in = 2000,
-                   thin = 5, n_starts = 30, n_cut = 300)
+
+fit <- lsdynam_fit(fa$events_df, 
+                   n = fa$n, 
+                   D = 2, 
+                   n_iter = 12000, 
+                   burn_in = 2000,
+                   thin = 5, 
+                   n_starts = 30, 
+                   n_cut = 300)
 ```
