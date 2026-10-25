@@ -1,0 +1,33 @@
+/*-- scss:defaults --*/
+
+@import url('https://acaimo.github.io/various/cm_fonts/fonts.css');
+
+// fonts
+$font-family-sans-serif: "Computer Modern Serif", Baskerville, "Palatino Linotype", Palatino, FreeSerif, serif !default;
+
+$presentation-heading-font-size: 1em !default;
+
+// colors
+$body-bg: #fff !default;
+$body-color: #000 !default;
+$link-color: #0E6cb9 !default;
+$selection-bg: #26351c !default;
+$mainColor: #000;
+
+
+// headings
+$presentation-heading-font: "Computer Modern Serif", Baskerville, "Palatino Linotype", Palatino,
+  FreeSerif, serif !default;
+$presentation-heading-color: #000 !default;
+
+
+$code-block-bg: #f7f7f7 !default;
+
+a:link { text-decoration: none; }
+a:visited { text-decoration: none; }
+a:hover { text-decoration: none; }
+a:active { text-decoration: none; }
+
+
+
+

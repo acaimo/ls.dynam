@@ -1,7 +1,6 @@
 Package: ls.dynam
 Type: Package
-Title: Latent Space Dynamic Network Actor Models with a Position-Rate
-        Link
+Title: Latent Space Dynamic Network Actor Models with a Position-Rate Link
 Version: 0.1.0
 Authors@R: c(
     person("Alberto", "Caimo", email = "alberto.caimo@gmail.com",
@@ -34,3 +33,4 @@ Packaged: 2026-10-17 20:13:56 UTC; root
 Author: Alberto Caimo [aut, cre] (<https://orcid.org/0000-0001-8956-7166>),
   Isabella Gollini [aut] (<https://orcid.org/0000-0002-7738-5688>)
 Maintainer: Alberto Caimo <alberto.caimo@gmail.com>
+URL: https://acaimo.github.io/ls.dynam/
