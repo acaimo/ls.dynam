@@ -75,11 +75,19 @@ Roberts, G. O. and Tweedie, R. L. (1996). Exponential convergence of
 Langevin distributions and their discrete approximations. \emph{Bernoulli}, 2,
 341--363.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://acaimo.github.io/ls.dynam/}
+}
+
+}
 \author{
 \strong{Maintainer}: Alberto Caimo \email{alberto.caimo@gmail.com} (\href{https://orcid.org/0000-0001-8956-7166}{ORCID})
 
 Authors:
 \itemize{
+  \item Alberto Caimo \email{alberto.caimo@gmail.com} (\href{https://orcid.org/0000-0001-8956-7166}{ORCID})
   \item Isabella Gollini (\href{https://orcid.org/0000-0002-7738-5688}{ORCID})
 }
 
