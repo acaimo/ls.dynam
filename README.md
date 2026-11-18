@@ -1,7 +1,7 @@
 # ls.dynam
 
 Latent space dynamic network actor models (DyNAMs) with a position-rate link,
-for relational event data such as e-mail.
+for relational event data.
 
 In a DyNAM each event is the outcome of two decisions: when an actor becomes
 active (the rate sub-process) and whom it selects (the choice sub-process).
